@@ -1,0 +1,23 @@
+# Server config
+server:
+  servlet:
+    context-path: /currency/api
+  error:
+    include-message: ALWAYS
+
+#Third party services config
+api:
+  currency:
+    client-name: currencies
+    url: https://openexchangerates.org/api/
+    appId: e5b6fb148a7c4865b81d62d972c1b44c
+    baseCurrencyCode: RUB
+    zoneId: GMT+00:00 #Currency service time zone needed for proper requests
+  gif:
+    client-name: gifs
+    url: https://api.giphy.com/v1/gifs/
+    appId: kYbNOu7jHBU7PrlsaFcshoNE7V59z5SI
+    good-performance-search-word: rich
+    bad-performance-search-word: broke
+
+
