@@ -13,6 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.study.currency_service.services.interfaces.CurrencyService;
 import ru.study.currency_service.services.interfaces.GifService;
 
+import java.util.regex.Pattern;
+
+import static java.util.regex.Pattern.compile;
 import static org.slf4j.LoggerFactory.getLogger;
 import static ru.study.currency_service.services.interfaces.CurrencyService.PerformanceResult.UP;
 
@@ -20,14 +23,19 @@ import static ru.study.currency_service.services.interfaces.CurrencyService.Perf
 @RequestMapping("")
 public class CurrencyController {
     private final Logger logger = getLogger(CurrencyController.class);
+
+    private static final Pattern CURRENCY_PATTERN = compile("^[A-Z]{3}$");
+
     @Autowired
     CurrencyService currencyServiceImpl;
     @Autowired
     GifService gifServiceImpl;
     @Value("${api.currency.baseCurrencyCode}")
     private String baseCurrencyCode;
+
     @Value("${api.gif.good-performance-search-word}")
     private String goodPerformanceSearchWord;
+
     @Value("${api.gif.bad-performance-search-word}")
     private String badPerformanceSearchWord;
 
@@ -35,17 +43,11 @@ public class CurrencyController {
     public byte[] getGifByCurrencyPerformance(@RequestParam(name = "currencyCode") String targetCurrencyCode) {
         validateCurrencyCode(targetCurrencyCode);
 
-        String searchWord;
+        var performanceResult = currencyServiceImpl.getCurrencyPerformance(targetCurrencyCode);
 
-        var performance = currencyServiceImpl.getCurrencyPerformance(targetCurrencyCode);
+        logger.info("Target currency: {}; base currency: {}; performanceResult: {}", targetCurrencyCode, baseCurrencyCode, performanceResult);
 
-        logger.info("Target currency: {}; base currency: {}; performance: {}", targetCurrencyCode, baseCurrencyCode, performance);
-
-        if (performance == UP) {
-            searchWord = "rich";
-        } else {
-            searchWord = "broke";
-        }
+        String searchWord = performanceResult == UP ? goodPerformanceSearchWord : badPerformanceSearchWord;
 
         return gifServiceImpl.getRandomGifByTag(searchWord);
     }
@@ -55,7 +57,7 @@ public class CurrencyController {
     // ===================================================================================================================
 
     private void validateCurrencyCode(String currencyCode) {
-        if (!currencyCode.matches("^[A-Z]{3}$")) {
+        if (!CURRENCY_PATTERN.matcher(currencyCode).matches()) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Invalid currency code");
