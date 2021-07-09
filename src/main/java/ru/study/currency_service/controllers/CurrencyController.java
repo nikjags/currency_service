@@ -22,14 +22,16 @@ import static ru.study.currency_service.services.interfaces.CurrencyService.Perf
 @RestController
 @RequestMapping("")
 public class CurrencyController {
-    private final Logger logger = getLogger(CurrencyController.class);
-
     private static final Pattern CURRENCY_PATTERN = compile("^[A-Z]{3}$");
+
+    private final Logger logger = getLogger(CurrencyController.class);
 
     @Autowired
     CurrencyService currencyServiceImpl;
+
     @Autowired
     GifService gifServiceImpl;
+
     @Value("${api.currency.baseCurrencyCode}")
     private String baseCurrencyCode;
 
